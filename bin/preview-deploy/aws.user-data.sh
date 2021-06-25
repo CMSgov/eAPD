@@ -102,9 +102,15 @@ restorecon -Rv /etc/nginx/nginx.conf
 semanage fcontext -a -t httpd_sys_content_t "/app/web(/.*)?"
 restorecon -Rv /app/web
 setsebool -P httpd_can_network_connect 1
+
 # Restart Nginx
 systemctl enable nginx
 systemctl restart nginx
+
+# Start/Enable Mongo
+systemctl daemon-reload
+systemctl enable mongod
+systemctl start mongod
 
 # Setup pm2 to start itself at machine launch, and save its current
 # configuration to be restored when it starts
