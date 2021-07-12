@@ -3,7 +3,7 @@ module.exports = {
     client: 'postgresql',
     connection: {
       host: process.env.DEV_DB_HOST || 'db',
-      database: 'hitech_apd',
+      database: process.env.DEV_DB_NAME || 'hitech_apd',
       user: process.env.DEV_DB_USER || 'postgres',
       password: process.env.DEV_DB_PASSWORD || 'cms'
     },

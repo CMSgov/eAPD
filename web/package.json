@@ -17,7 +17,10 @@
     "prebuild:storybook": "npm run scaffold && npm run test:generate-output",
     "build-storybook": "npm run prebuild:storybook && build-storybook -o ../docs-build -c .storybook -s ./dist",
     "storybook": "npm run scaffold && start-storybook -s ./dist -p 6006",
-    "preinstall": "npx npm-force-resolutions"
+    "preinstall": "npx npm-force-resolutions",
+    "cy:open": "./cypress/cypress-setup.sh && cypress open",
+    "cy:run": "./cypress/cypress-setup.sh && cypress run",
+    "cy:run:ci": "cypress run"
   },
   "repository": {
     "type": "git",
@@ -128,6 +131,7 @@
     "@storybook/react": "^6.3.1",
     "@storybook/source-loader": "^6.3.1",
     "@storybook/storybook-deployer": "^2.8.10",
+    "@testing-library/cypress": "^7.0.6",
     "@testing-library/jest-dom": "^5.11.10",
     "@testing-library/react": "^11.2.6",
     "@testing-library/react-hooks": "^5.1.1",
@@ -140,6 +144,7 @@
     "core-js": "^3.10.1",
     "css-loader": "^5.2.2",
     "cssnano": "^4.1.10",
+    "cypress": "^7.6.0",
     "d3-geo": "^2.0.1",
     "enzyme": "^3.11.0",
     "enzyme-adapter-react-16": "^1.15.6",
@@ -148,6 +153,7 @@
     "eslint-config-airbnb": "^18.2.1",
     "eslint-config-prettier": "^8.2.0",
     "eslint-import-resolver-jest": "^3.0.0",
+    "eslint-plugin-cypress": "^2.11.3",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-jsx-a11y": "^6.4.1",
     "eslint-plugin-react": "^7.23.2",

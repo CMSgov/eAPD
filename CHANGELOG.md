@@ -19,13 +19,18 @@ Anticipated release: July 9, 2021
 
 #### ⚙️ Behind the scenes
 
+
+- install cypress for end-to-end testing ([#3226])
+
 - Created endpoint to allow a user to switch states ([#3030])
 - Added security check to state/:id endpoint so only users with access to that state can get the data ([#3129])
 - endpoint for pulling a user's affiliations ([#3207])
 
+
 # Previous releases
 
 See our [release history](https://github.com/CMSgov/eAPD/releases)
+
 
 [#2581]: https://github.com/CMSgov/eAPD/issues/2581
 [#2996]: https://github.com/CMSgov/eAPD/issues/2996
@@ -35,6 +40,7 @@ See our [release history](https://github.com/CMSgov/eAPD/releases)
 [#3181]: https://github.com/CMSgov/eAPD/issues/3181
 [#3204]: https://github.com/CMSgov/eAPD/issues/3204
 [#3207]: https://github.com/CMSgov/eAPD/issues/3207
+[#3226]: https://github.com/CMSgov/eAPD/issues/3226
 [#3180]: https://github.com/CMSgov/eAPD/issues/3180
 [#3181]: https://github.com/CMSgov/eAPD/issues/3181
 [#3169]: https://github.com/CMSgov/eAPD/issues/3169
