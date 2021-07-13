@@ -1,5 +1,6 @@
-import '@babel/polyfill';
 import '@okta/okta-auth-js/polyfill';
+import 'core-js/stable';
+import 'regenerator-runtime/runtime';
 
 import { createBrowserHistory } from 'history';
 import React from 'react';
@@ -9,10 +10,10 @@ import { createStore, applyMiddleware } from 'redux';
 import { createLogger } from 'redux-logger'; // eslint-disable-line import/no-extraneous-dependencies
 import thunk from 'redux-thunk';
 
+import saveMiddleware from './saveMiddleware';
 import { initI18n } from './i18n';
 import reducer from './reducers';
 import Root from './components/Root';
-import saveMiddleware from './saveMiddleware';
 import { browserIsRed } from './util/browser';
 import { html as browserHtml } from './components/UpgradeBrowser';
 import cookieHtml from './components/EnableCookies';

@@ -1,5 +1,6 @@
-import '@babel/polyfill';
 import '@okta/okta-auth-js/polyfill';
+import 'core-js/stable';
+import 'regenerator-runtime/runtime';
 
 import { createBrowserHistory } from 'history';
 import React from 'react';
