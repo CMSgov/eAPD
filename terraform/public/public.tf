@@ -1,6 +1,7 @@
 #variable "eapd_jumpbox_ami" {}
 variable "eapd_jumpbox_instance_type" {}
-variable "eapd_jumpbox_key_name" {}
+variable "eapd_jumpbox_key_name_bb" {}
+variable "eapd_jumpbox_key_name_tf" {}
 variable "eapd_jumpbox_vpc_security_group_ids" {}
 variable "eapd_jumpbox_subnet_id" {}
 variable "eapd_jumpbox_associate_public_ip_address" {}
@@ -42,7 +43,8 @@ module "instances" {
 
     eapd_jumpbox_ami                          = data.aws_ami.latest_golden_image
     eapd_jumpbox_instance_type                = var.eapd_jumpbox_instance_type
-    eapd_jumpbox_key_name                     = var.eapd_jumpbox_key_name
+    eapd_jumpbox_key_name_bb                  = var.eapd_jumpbox_key_name_bb
+    eapd_jumpbox_key_name_tf                  = var.eapd_jumpbox_key_name_tf
     eapd_jumpbox_vpc_security_group_ids       = var.eapd_jumpbox_vpc_security_group_ids
     eapd_jumpbox_subnet_id                    = var.eapd_jumpbox_subnet_id
     eapd_jumpbox_associate_public_ip_address  = var.eapd_jumpbox_associate_public_ip_address
