@@ -5,8 +5,7 @@ const {
   exchangeToken,
   verifyWebToken
 } = require('../../auth/jwtUtils');
-const { createOrUpdateOktaUserFromOkta } = require('../../db/oktaUsers')
-
+const { createOrUpdateOktaUserFromOkta } = require('../../db/oktaUsers');
 
 module.exports = (
   app,
@@ -15,31 +14,28 @@ module.exports = (
     verifier = verifyEAPDToken,
     tokenExchanger = exchangeToken,
     updateFromOkta = createOrUpdateOktaUserFromOkta
-
   } = {}
 ) => {
   logger.debug('setting up GET endpoint');
-  app.get('/me', async (req, res) => {
+  app.get('/me', async (req, res, next) => {
     try {
       const jwt = extractor(req);
       const claims = jwt ? await verifyWebToken(jwt, { verifier }) : false;
       if (!claims) return res.status(401).end();
-      await updateFromOkta(claims.id)
-      res.send(claims);
-    } catch (error) {
-      res.status(500).send(error);
+      await updateFromOkta(claims.id);
+      return res.send(claims);
+    } catch (e) {
+      return next(e);
     }
-    return null;
   });
 
-  app.get('/me/jwToken', async (req, res) => {
+  app.get('/me/jwToken', async (req, res, next) => {
     try {
       const user = await tokenExchanger(req, res);
-      if (!user) res.status(401).send();
-      res.send(user);
-    } catch (error) {
-      res.status(500).send(error);
+      if (!user) return res.status(401).send();
+      return res.send(user);
+    } catch (e) {
+      return next(e);
     }
-    return null;
   });
 };
