@@ -80,7 +80,8 @@ const createUsersToAdd = async (knex, oktaClient) => {
       state_id: 'ak',
       role_id: stateAdminRoleId,
       status: 'approved',
-      updated_by: 'seeds'
+      updated_by: 'seeds',
+      username: 'em@il.com'
     });
     // Add an expired certification and this user will be downgraded to "regular user"
     stateCertifications.push({

@@ -16,6 +16,7 @@ api/test-data/files
 notes.md
 schema.sql
 Makefile
+api/seeds/test/tokens.json
 
 # use npm to manage packages, not yarn
 api/yarn.lock
