@@ -145,7 +145,7 @@ tap.test('apds/:id GET endpoint', async tests => {
     test.ok(
       app.get.calledWith(
         '/apds/:id(\\d+)',
-        can('edit-document'),
+        can('view-document'),
         sinon.match.func
       ),
       'user-specific apds GET endpoint is registered'

@@ -1,154 +1,141 @@
 import React from 'react';
-import { renderWithConnection, fireEvent, axe } from '../shared/apd-testing-library';
+import { render, fireEvent, axe, screen, waitFor } from '../shared/apd-testing-library';
 import StateAccessRequest from './StateAccessRequest';
+import MockAdapter from 'axios-mock-adapter';
+import axios from '../util/api';
 
+const fetchMock = new MockAdapter(axios);
 const defaultProps = {
   errorMessage: null,
   saveAction: jest.fn(),
   fetching: false,
-  secondaryButtonText: "Back to Login"
+  secondaryButtonText: 'Back to Login',
+  cancelAction: () => {}
+
 };
 
 
 // https://testing-library.com/docs/example-input-event/
-const setup = (props = {}) =>  renderWithConnection(<StateAccessRequest {...defaultProps} {...props} />);
-let setupWithCustomState;
+const setup = (props = {}) => render(<StateAccessRequest {...defaultProps} {...props} />);
 
 describe('<StateAccessRequest />', () => {
+
+  beforeEach(() => {
+    fetchMock.reset();
+  });
+
+
   it('should not fail any accessibility tests', async () => {
+    fetchMock.onGet('/affiliations/me').reply(200, []);
     const { container } = setup();
-    expect(await axe(container)).toHaveNoViolations();
+
+    await waitFor(async () => {
+      expect(await axe(container)).toHaveNoViolations();
+    });
   });
 
-  it('renders correct title when no existing affiliations', () => {
-    setupWithCustomState = renderWithConnection(<StateAccessRequest />,
+  it('renders correct title when no existing affiliations', async () => {
+    fetchMock.onGet('/affiliations/me').reply(200, []);
+    setup();
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Verify Your Identity' })).toBeTruthy();
+    })
+  });
+
+  it('renders correct title(s) with existing affiliations', async () => {
+    fetchMock.onGet('/affiliations/me').reply(200, [
+
+                {
+                  stateId: 'mo',
+                  status: 'requested'
+                }
+              ]);
+
+    setup()
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Manage Account' })).toBeTruthy();
+      expect(screen.getByText('Existing Affiliations')).toBeTruthy();
+    })
+  });
+
+  it('renders existing affiliations', async () => {
+    fetchMock.onGet('/affiliations/me').reply(200, [
       {
-        initialState: {
-          user: {
-            data: {
-              state: { id: 'mo' },
-              affiliations: []
-            }
-          }
-        }
+        stateId: 'az',
+        status: 'approved'
+      },
+      {
+        stateId: 'md',
+        status: 'revoked'
+      },
+      {
+        stateId: 'ak',
+        status: 'requested'
       }
-    );
+    ]);
+    setup()
 
-  const { getByRole } = setupWithCustomState;
-  expect(getByRole('heading', { name: 'Verify Your Identity' })).toBeTruthy();
+    await waitFor(() => {
+      expect(screen.getByText('Active')).toBeTruthy();
+      expect(screen.getByText('Arizona')).toBeTruthy();
+      expect(screen.getByText('Revoked')).toBeTruthy();
+      expect(screen.getByText('Maryland')).toBeTruthy();
+      expect(screen.getByText('Pending')).toBeTruthy();
+      expect(screen.getByText('Alaska')).toBeTruthy();
+    });
   });
 
-  it('renders correct title(s) with existing affiliations', () => {
-    setupWithCustomState = renderWithConnection(<StateAccessRequest />,
-        {
-          initialState: {
-            user: {
-              data: {
-                affiliations: [
-                  {
-                    state_id: 'mo',
-                  }
-                ]
-              }
-            }
-          }
-        }
-      );
+  it('renders message when no affiliations exist per status', async () => {
+    fetchMock.onGet('/affiliations/me').reply(200, [
+      {
+        stateId: 'ar',
+        status: 'requested'
+      },
+      {
+        stateId: 'ak',
+        status: 'revoked'
+      }
 
-    const { getByRole, getByText } = setupWithCustomState;
-    expect(getByRole('heading', { name: 'Manage Account' })).toBeTruthy();
-    expect(getByText('Existing Affiliations')).toBeTruthy();
-  });
+    ]);
+    setup();
 
-  it('renders existing affiliations', () => {
-    setupWithCustomState = renderWithConnection(<StateAccessRequest />,
-        {
-          initialState: {
-            user: {
-              data: {
-                affiliations: [
-                  {
-                    state_id: 'az',
-                    status: 'approved'
-                  },
-                  {
-                    state_id: 'md',
-                    status: 'revoked'
-                  },
-                  {
-                    state_id: 'ak',
-                    status: 'requested'
-                  }
-                ]
-              }
-            }
-          }
-        }
-      );
+    await waitFor(() => {
+      expect(screen.getByText('No active affiliations')).toBeTruthy();
+    });
 
-    const { getByText } = setupWithCustomState;
-    expect(getByText('Active')).toBeTruthy();
-    expect(getByText('Arizona')).toBeTruthy();
-    expect(getByText('Revoked')).toBeTruthy();
-    expect(getByText('Maryland')).toBeTruthy();
-    expect(getByText('Pending')).toBeTruthy();
-    expect(getByText('Alaska')).toBeTruthy();
-  });
 
-  it('renders message when no affiliations exist per status', () => {
-    setupWithCustomState = renderWithConnection(<StateAccessRequest />,
-        {
-          initialState: {
-            user: {
-              data: {
-                affiliations: [
-                  {
-                    state_id: 'ak',
-                    status: 'requested'
-                  },
-                  {
-                    state_id: 'ak',
-                    status: 'revoked'
-                  }
-                ]
-              }
-            }
-          }
-        }
-      );
-
-    const { getByText } = setupWithCustomState;
-    expect(getByText('No active affiliations')).toBeTruthy();
   });
 
   it('renders label', () => {
-    const { getByLabelText } = setup();
-    expect(getByLabelText('Select your State Affiliation')).toBeTruthy();
+    setup();
+    expect(screen.getByLabelText('Select your State Affiliation')).toBeTruthy();
   });
 
   test('Secondary button renders the right text', () => {
-    const { getByText } = setup();
-    expect(getByText(/Back to Login/i)).toBeTruthy();
+    setup();
+    expect(screen.getByText(/Back to Login/i)).toBeTruthy();
   });
 
   test('Back to Login button renders', () => {
-    const { getByText } = setup({secondaryButtonText:"This is a secondary button"});
-    expect(getByText(/This is a secondary button/i)).toBeTruthy();
+    setup({ secondaryButtonText: 'This is a secondary button' });
+    expect(screen.getByText(/This is a secondary button/i)).toBeTruthy();
   });
 
   it('renders the input when entered', () => {
-    const { getByLabelText } = setup();
-    const input = getByLabelText('Select your State Affiliation');
+    setup();
+    const input = screen.getByLabelText('Select your State Affiliation');
     fireEvent.change(input, { target: { value: 'Al' } });
     expect(input.value).toBe('Al');
   });
 
   it('renders the selection badge when an item is picked', () => {
-    const { getByText, getByLabelText } = setup();
-    const input = getByLabelText('Select your State Affiliation');
+    setup();
+    const input = screen.getByLabelText('Select your State Affiliation');
     fireEvent.change(input, { target: { value: 'Alabama' } });
-    fireEvent.click(getByText('Alabama'));
-    expect(getByText('Alabama')).toBeTruthy();
+    fireEvent.click(screen.getByText('Alabama'));
+    expect(screen.getByText('Alabama')).toBeTruthy();
   });
 
   it('renders the no results on an invalid entry', () => {

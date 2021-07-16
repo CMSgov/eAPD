@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import React, { useState, Fragment } from 'react';
+import React, { useState, Fragment, useEffect } from 'react';
 import { connect } from 'react-redux';
 
 import { useHistory } from 'react-router-dom';
@@ -13,9 +13,9 @@ import StateAccessRequest from '../StateAccessRequest';
 import StateAccessRequestConfirmation from '../StateAccessRequestConfirmation';
 import { getIsFedAdmin } from '../../reducers/user.selector';
 import { goToDashboard } from '../../actions/app';
+import axios from '../../util/api';
 
 const ManageAccount = ({
-  currentAffiliations, 
   createAccessRequest,
   completeAccessRequest,
   error,
@@ -28,6 +28,17 @@ const ManageAccount = ({
 
   const [showConfirmation, setShowConfirmation] = useState(false);
 
+  const [currentAffiliations, setCurrentAffiliations] = useState([])
+
+  useEffect( ()=>{
+    const fetchData = async () => {
+      const affiliations = await axios.get('/affiliations/me')
+      setCurrentAffiliations(affiliations.data)
+      return null
+    }
+
+    fetchData()
+  }, [])
   const handleCreateAccessRequest = async states => {
     const response = await createAccessRequest(states);
     if (response) { setShowConfirmation(true) }
@@ -73,7 +84,6 @@ ManageAccount.defaultProps = {
 };
 
 ManageAccount.propTypes = {
-  currentAffiliations: PropTypes.array.isRequired,
   createAccessRequest: PropTypes.func.isRequired,
   completeAccessRequest: PropTypes.func.isRequired,
   error: PropTypes.string,
@@ -89,7 +99,6 @@ const mapDispatchToProps = {
 };
 
 const mapStateToProps = state => ({
-  currentAffiliations: state.user.data.affiliations,
   error: state.auth.error,
   isAdmin: getIsFedAdmin(state),
   currentUser: state.user,

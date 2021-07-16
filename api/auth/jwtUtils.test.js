@@ -380,7 +380,28 @@ tap.test('Local jwtUtils', async t => {
       }
     });
 
+    const originalPermissions = [
+      'original-roles',
+      'original-affiliations',
+      'original-affiliations'
+    ]
+    const newPermissions = [
+      'new-draft',
+      'new-document',
+      'new-document',
+      'new-roles'
+    ]
+    const getUserPermissionsForStates = sinon.stub()
+    getUserPermissionsForStates
+      .withArgs('ABCD1234')
+      .resolves({
+        original:originalPermissions,
+        new: newPermissions
+      })
+
+
     const user = {
+      id: 'ABCD1234',
       state: {
         id: 'original',
         address1: 'Original Address1',
@@ -388,15 +409,8 @@ tap.test('Local jwtUtils', async t => {
           name: 'Original Director'
         }
       },
-      states: ['original', 'new'],
-      permissions: {
-        original: [
-          'original-roles',
-          'original-affiliations',
-          'original-affiliations'
-        ],
-        new: ['new-draft', 'new-document', 'new-document', 'new-roles']
-      },
+      states: {original:'approved', new: 'approved'},
+
       foo: 'bar',
       activities: [
         'original-roles',
@@ -406,17 +420,18 @@ tap.test('Local jwtUtils', async t => {
     };
 
     const token = await changeState(user, 'new', {
-      getStateById_: getStateById
+      getStateById_: getStateById,
+      getUserPermissionsForStates_:getUserPermissionsForStates
     });
     const newUser = await actualVerifyEAPDToken(token);
 
     t.same(newUser.state.id, 'new', 'token has the new state');
     t.same(
       newUser.activities,
-      user.permissions.new,
+      newPermissions,
       'token activities are those from the right permission set'
     );
-    t.same(newUser.permissions, user.permissions, 'permissions are unaltered');
+
     t.same(user.state.id, 'original', 'original user is unchanged');
   });
 });

@@ -1,12 +1,12 @@
 import PropTypes from 'prop-types';
-import React, { useReducer, Fragment } from 'react';
-
-import { connect } from 'react-redux';
+import React, { useReducer, Fragment, useState, useEffect } from 'react';
 
 import { Autocomplete, Badge, TextField } from '@cmsgov/design-system';
 import AuthenticationForm from '../components/AuthenticationForm';
 
 import { STATES } from '../util/states';
+
+import axios from '../util/api';
 
 const statesWithFederal = [...STATES, { id: 'fd', name: 'Federal' }];
 
@@ -14,16 +14,31 @@ const StateAccessRequest = ({
   saveAction, 
   cancelAction,
   errorMessage, 
-  fetching, 
-  currentAffiliations,
+  fetching,
   secondaryButtonText,
 }) => {
 
-  const existingAffiliations = currentAffiliations.map(element => { 
-    const stateDetails = statesWithFederal.find(item => item.id === element.state_id)
-    return { id: element.state_id, name: stateDetails.name, status: element.status } 
+  const [existingAffiliations, setExistingAffiliations] = useState([])
+
+  useEffect( ()=>{
+    const fetchData = async () => {
+      const affiliations = await axios.get('/affiliations/me')
+      const results = affiliations.data.map(affiliation =>{
+        const stateDetails = statesWithFederal.find(item => item.id === affiliation.stateId)
+        return { id: affiliation.stateId, name: stateDetails.name, status: affiliation.status }
+      })
+      setExistingAffiliations(results)
+      return null
+    }
+    fetchData()
+  }, [])
+
+  /**
+  const existingAffiliations = Object.keys(currentAffiliations).map(stateId => {
+    const stateDetails = statesWithFederal.find(item => item.id === stateId)
+    return { id: stateId, name: stateDetails.name, status: currentAffiliations[stateId] }
   });
-  
+  */
   const availableStates = statesWithFederal.filter( item => {
     return !existingAffiliations.find(affiliation => {
       return affiliation.id === item.id;
@@ -228,7 +243,6 @@ const StateAccessRequest = ({
 };
 
 StateAccessRequest.propTypes = {
-  currentAffiliations: PropTypes.array,
   saveAction: PropTypes.func.isRequired,
   errorMessage: PropTypes.oneOfType([PropTypes.string, PropTypes.element]),
   fetching: PropTypes.bool.isRequired,
@@ -238,14 +252,10 @@ StateAccessRequest.propTypes = {
 
 StateAccessRequest.defaultProps = {
   errorMessage: false,
-  currentAffiliations: [],
 
 };
 
-const mapStateToProps = state => ({
-  currentAffiliations: state.user.data.affiliations,
-});
 
-export default connect(mapStateToProps)(StateAccessRequest);
+export default StateAccessRequest;
 
-export { StateAccessRequest as plain, mapStateToProps };
+export { StateAccessRequest as plain };

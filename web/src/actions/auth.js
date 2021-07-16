@@ -168,11 +168,11 @@ const authenticationSuccess = sessionToken => async dispatch => {
   dispatch(setLatestActivity());
 
   const user = await getCurrentUser();
-  if (!user.states || user.states.length === 0) {
+  if (!user.states || Object.keys(user.states).length === 0) {
     dispatch(requireAccessToState());
     return '/login/affiliations/request';
   }
-  if (user.states.length === 1) {
+  if (Object.keys(user.states).length === 1) {
     dispatch(updateUserInfo(user));
     dispatch(completeLogin());
     if (user.activities) {

@@ -4,7 +4,6 @@ const knex = require('./knex');
 const {
   getRolesAndActivities: actualGetRolesAndActivities,
   getUserAffiliatedStates: actualGetUserAffiliatedStates,
-  getUserPermissionsForStates: actualGetUserPermissionsForStates
 } = require('./auth');
 const { getStateById: actualGetStateById } = require('./states');
 const { createOrUpdateOktaUser, getOktaUser } = require('./oktaUsers');
@@ -39,7 +38,6 @@ const actualGetSelectedStateIdByUserId = (id, { db = knex } = {}) => {
 const populateUser = async (
   user,
   {
-    getUserPermissionsForStates = actualGetUserPermissionsForStates,
     getUserAffiliatedStates = actualGetUserAffiliatedStates,
     getStateById = actualGetStateById,
     getRolesAndActivities = actualGetRolesAndActivities,
@@ -49,10 +47,7 @@ const populateUser = async (
 ) => {
   if (user) {
     const populatedUser = user;
-    populatedUser.permissions =
-      (await getUserPermissionsForStates(user.id)) || [];
     populatedUser.states = (await getUserAffiliatedStates(user.id)) || [];
-    populatedUser.affiliations = (await getAffiliationsByUserId(user.id)) || [];
 
     // grab the selected affiliation
     const selectedStateId = await getSelectedStateIdByUserId(user.id);

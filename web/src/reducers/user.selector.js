@@ -29,11 +29,9 @@ export const getUserStateOrTerritory = ({
 }) => state;
 
 export const getUserAffiliationForCurrentState = ({
-  user: { data: { state: { id = null } = {}, affiliations = [] } = {} } = {}
+  user: { data: { state: { id = null } = {}, states = [] } = {} } = {}
 }) => {
-  return affiliations.length > 0
-    ? affiliations.find(affiliation => affiliation.state_id === id)
-    : null;
+  return {status: states[id]};
 };
 
 export const getUserStateOrTerritoryStatus = state => {

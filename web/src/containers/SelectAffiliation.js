@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { useHistory } from 'react-router-dom';
@@ -7,13 +7,15 @@ import { ChoiceList } from '@cmsgov/design-system';
 import CardForm from '../components/CardForm';
 
 import { STATES } from '../util/states';
+import axios from '../util/api';
 
 import {
   selectAffiliation
 } from '../actions/auth';
 
+const statesWithFederal = [...STATES, { id: 'fd', name: 'Federal' }];
+
 const SelectAffiliation = ({
-  availableAffiliations,
   currentStateId,
   error,
   selectAffiliation: selectUserAffiliation
@@ -21,8 +23,23 @@ const SelectAffiliation = ({
 
   const history = useHistory();
 
-  const [selectedAffiliation, setSelectedAffiliation] = useState(currentStateId);
 
+  const [selectedAffiliation, setSelectedAffiliation] = useState(currentStateId);
+  const [availableAffiliations, setAvailableAffiliations] = useState([])
+
+
+  useEffect( ()=>{
+    const fetchData = async () => {
+      const affiliations = await axios.get('/affiliations/me')
+      const states = affiliations.data.map(affiliation =>{
+        return affiliation.stateId
+      })
+      setAvailableAffiliations(states)
+      return null
+    }
+
+    fetchData()
+  }, [])
   const onSave = async () => {
     const route = await selectUserAffiliation(selectedAffiliation, currentStateId);
     if(route) {
@@ -32,7 +49,7 @@ const SelectAffiliation = ({
 
   const choiceList = availableAffiliations.map(item => {
     const choice = {
-      label: STATES.find(state => state.id === item).name,
+      label: statesWithFederal.find(state => state.id === item).name,
       value: item
     }
     if(item === currentStateId) {
@@ -66,7 +83,6 @@ const SelectAffiliation = ({
 }
 
 SelectAffiliation.propTypes = {
-  availableAffiliations: PropTypes.array.isRequired,
   selectAffiliation: PropTypes.func.isRequired,
   currentStateId: PropTypes.string,
   error: PropTypes.string
@@ -78,7 +94,6 @@ SelectAffiliation.defaultProps = {
 };
 
 const mapStateToProps = state => ({
-  availableAffiliations: state.user.data.states,
   currentStateId: state.user.data.state.id,
   error: state.auth.error
 });

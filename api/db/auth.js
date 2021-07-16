@@ -77,10 +77,15 @@ const getRolesAndActivities = async ({ db = knex } = {}) =>
  */
 const getUserAffiliatedStates = async (userId, { db = knex } = {}) =>
   db
-    .select('state_id')
+    .select('state_id', 'status')
     .from('auth_affiliations')
     .where('user_id', userId)
-    .then(rows => rows.map(row => row.state_id));
+    .then(rows => rows.reduce( (states, row) => {
+      // eslint-disable-next-line no-param-reassign
+      states[row.state_id] = row.status
+      return states
+
+    }, {}));
 
 /**
  * Retrieves a user's permissions per state

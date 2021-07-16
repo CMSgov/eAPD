@@ -12,7 +12,7 @@ module.exports = (app, {getActiveAuthRoles = gr, changeState = cs } = {}) => {
     const { stateId } = req.params;
     const user = req.user
     if (!user) res.status(401).send();
-    if (user.states.includes(stateId)){
+    if (Object.keys(user.states).includes(stateId)){
       const jwt = await changeState(user, stateId)
       res.send({jwt})
 

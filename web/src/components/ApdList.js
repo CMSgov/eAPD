@@ -10,12 +10,6 @@ import { createApd, deleteApd, selectApd } from '../actions/app';
 import { t } from '../i18n';
 import { selectApdDashboard, selectApds } from '../reducers/apd.selectors';
 import UpgradeBrowser from './UpgradeBrowser';
-import {
-  getUserStateOrTerritoryStatus,
-  getIsFedAdmin,
-  getIsSysAdmin
-} from '../reducers/user.selector';
-import { AFFILIATION_STATUSES } from '../constants';
 import Loading from './Loading';
 
 const ApdList = ({
@@ -27,9 +21,7 @@ const ApdList = ({
   route,
   selectApd: select,
   state,
-  approvalStatus,
-  isFedAdmin,
-  isSysAdmin
+  activities
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -45,15 +37,9 @@ const ApdList = ({
     select(id, `${route}/${id}`);
   };
 
-  const canCreateApd =
-    !isFedAdmin &&
-    !isSysAdmin &&
-    approvalStatus === AFFILIATION_STATUSES.APPROVED;
+  const canCreateApd = activities.indexOf('edit-document') >=0
 
-  const canDeleteApd =
-    !isFedAdmin &&
-    !isSysAdmin &&
-    approvalStatus === AFFILIATION_STATUSES.APPROVED;
+  const canDeleteApd = activities.indexOf('edit-document') >=0
 
   if (isLoading) {
     return (
@@ -182,9 +168,7 @@ ApdList.propTypes = {
   createApd: PropType.func.isRequired,
   deleteApd: PropType.func.isRequired,
   selectApd: PropType.func.isRequired,
-  approvalStatus: PropType.string.isRequired,
-  isFedAdmin: PropType.func.isRequired,
-  isSysAdmin: PropType.func.isRequired
+  activities: PropType.array.isRequired
 };
 
 ApdList.defaultProps = {
@@ -194,12 +178,9 @@ ApdList.defaultProps = {
 const mapStateToProps = state => ({
   apds: selectApdDashboard(state),
   fetching: selectApds(state).fetching || false,
-  error: selectApds(state).error || null,
+  error: selectApds(state).error || '',
   state: state.user.data.state || null,
-  isFedAdmin: getIsFedAdmin(state),
-  isSysAdmin: getIsSysAdmin(state),
-  approvalStatus:
-    getUserStateOrTerritoryStatus(state) || AFFILIATION_STATUSES.REQUESTED
+  activities: state.user.data.activities
 });
 
 const mapDispatchToProps = {

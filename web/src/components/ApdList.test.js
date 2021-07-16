@@ -33,7 +33,8 @@ describe('<ApdList />', () => {
       createApd: jest.fn(),
       deleteApd: jest.fn(),
       selectApd: jest.fn(),
-      route: '/apd'
+      route: '/apd',
+      error: undefined
     };
   });
 
@@ -47,11 +48,10 @@ describe('<ApdList />', () => {
             user: {
               data: {
                 state: { id: 'mo' },
-                affiliations: [
-                  {
-                    state_id: 'mo',
-                    status: AFFILIATION_STATUSES.APPROVED
-                  }
+                states: { 'mo': AFFILIATION_STATUSES.APPROVED },
+                activities: [
+                  "view-document",
+                  "edit-document",
                 ]
               }
             }
@@ -101,11 +101,10 @@ describe('<ApdList />', () => {
             user: {
               data: {
                 state: { id: 'mo' },
-                affiliations: [
-                  {
-                    state_id: 'mo',
-                    status: AFFILIATION_STATUSES.APPROVED
-                  }
+                states: { state_id: AFFILIATION_STATUSES.APPROVED },
+                activities: [
+                  "view-document",
+                  "edit-document",
                 ]
               }
             },
@@ -147,9 +146,12 @@ describe('<ApdList />', () => {
           user: {
             data: {
               state: { id: 'mo' },
-              role: 'eAPD Federal Admin',
               affiliations: [
                 { state_id: 'mo', status: AFFILIATION_STATUSES.APPROVED }
+              ],
+              activities: [
+                "not-view-document",
+                "not-edit-document",
               ]
             }
           }
@@ -163,52 +165,6 @@ describe('<ApdList />', () => {
     });
   });
 
-  describe('sysadmin viewing state dashboard', () => {
-    beforeEach(() => {
-      renderUtils = renderWithConnection(<ApdList {...props} />, {
-        initialState: {
-          user: {
-            data: {
-              state: { id: 'mo' },
-              role: 'eAPD Federal Admin',
-              affiliations: [
-                { state_id: 'mo', status: AFFILIATION_STATUSES.APPROVED }
-              ]
-            }
-          },
-          apd: {
-            byId: {
-              [apd.id]: {
-                ...apd,
-                created: createdStr,
-                updated: updatedStr
-              }
-            }
-          }
-        }
-      });
-    });
-
-    it('should not display the create apd button', () => {
-      const { queryByText } = renderUtils;
-      expect(queryByText('Create new')).toBeNull();
-    });
-
-    it('should display the APD', () => {
-      const { getByText } = renderUtils;
-      expect(getByText(apd.name)).toBeTruthy();
-      expect(getByText(updatedStr)).toBeTruthy();
-      expect(getByText(createdStr)).toBeTruthy();
-    });
-
-    it('should allow the user to click on the APD to edit', () => {
-      const { getByText } = renderUtils;
-      expect(getByText(apd.name)).toBeTruthy();
-    });
-
-    it('should not display the delete apd button', () => {
-      const { queryByText } = renderUtils;
-      expect(queryByText('Delete')).toBeNull();
-    });
-  });
+// Deleted tests here because the role is not the relevant factor.  This is driven by
+// activities, so changing those is more important than a specific role.
 });
